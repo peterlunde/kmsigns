@@ -17,7 +17,7 @@ window.BrowserStudio=(()=>{
  function product(id){let p=state.products.find(p=>p.id===id);if(!p)throw Error('Product not found');return p}
  function missing(p){return !(p.features||[]).some(x=>String(x).trim())}
  async function fetchFeatures(ids,force=false){await open();if(featureBusy)throw Error('Feature retrieval is already running. Follow the progress above.');featureBusy=true;let todo=state.products.filter(p=>ids.includes(p.id)&&(force||missing(p))),done=0,results=[];emit('studio:progress',{done,total:todo.length});let next=0;
- async function worker(){while(next<todo.length){let p=todo[next++];try{let r=await remote({op:'product',url:p.source||'',name:p.name,style:p.style||'',gender:p.gender});if(!r.points.length)throw Error('No concise features found. Add points manually.');let current=product(p.id);if(missing(current))current.features=r.points;else current.feature_drafts=r.points;Object.assign(current,{source:r.source,feature_source:r.source,feature_date:r.date,feature_page_name:r.page_name,feature_status:'fetched',feature_error:''});await save();emit('studio:features',clone(current));results.push({name:p.name,status:'Draft ready; fetched automatically'})}catch(e){let current=product(p.id);current.feature_status='error';current.feature_error=e.message;await save();emit('studio:features',clone(current));results.push({name:p.name,status:e.message})}finally{done++;emit('studio:progress',{done,total:todo.length})}}}
+ async function worker(){while(next<todo.length){let p=todo[next++];try{let r=await remote({op:'product',url:p.source||'',name:p.name,style:p.style||'',gender:p.gender});if(!r.points.length)throw Error('No concise features found. Add points manually.');let current=state.products.find(x=>x.id===p.id);if(!current)continue;if(missing(current))current.features=r.points;else current.feature_drafts=r.points;Object.assign(current,{source:r.source,feature_source:r.source,feature_date:r.date,feature_page_name:r.page_name,feature_status:'fetched',feature_error:''});await save();emit('studio:features',clone(current));results.push({name:p.name,status:'Draft ready; fetched automatically'})}catch(e){let current=state.products.find(x=>x.id===p.id);if(!current)continue;current.feature_status='error';current.feature_error=e.message;await save();emit('studio:features',clone(current));results.push({name:p.name,status:e.message})}finally{done++;emit('studio:progress',{done,total:todo.length})}}}
  try{await Promise.all([worker(),worker()]);return results}finally{featureBusy=false;emit('studio:progress',{done,total:todo.length,finished:true})}}
  function scheduleFeatures(){setTimeout(()=>{if(featureBusy)return;let ids=state.products.filter(p=>missing(p)&&!p.feature_status).map(p=>p.id);if(ids.length)fetchFeatures(ids).catch(e=>emit('studio:error',e.message))},300)}
  async function importPack(file){await open();await navigator.storage?.persist?.();let zip=await JSZip.loadAsync(file);let manifest=zip.file('products.json')||Object.values(zip.files).find(f=>f.name.endsWith('/products.json'));if(!manifest)throw Error('Choose an exported product pack containing products.json');let prefix=manifest.name.slice(0,-'products.json'.length),incoming=JSON.parse(await manifest.async('string'));if(!Array.isArray(incoming.products))throw Error('Invalid product pack');let total=Object.values(zip.files).reduce((n,f)=>n+(f._data?.uncompressedSize||0),0);if(total>2000000000)throw Error('Unpacked product pack exceeds 2 GB');let known=new Set(state.products.map(p=>p.id)),added=0;
@@ -31,6 +31,35 @@ window.BrowserStudio=(()=>{
  async function route(path,data){await open();if(path==='state'){scheduleFeatures();return {...clone(state),fonts:await allFonts(),token:'local-browser',dataFolder:'IndexedDB · this browser'}}
  if(path==='save'){for(let change of data.products||[]){let p=product(change.id);for(let field of ['name','source','category','features','feature_drafts'])if(field in change)p[field]=clone(change[field]);for(let v of p.variants)if(v.id in (change.colours||{}))v.name=change.colours[v.id]}for(let field of ['settings','queue','simpleUI'])if(field in data)state[field]=clone(data[field]);await save();return {ok:true}}
  if(path==='images'){let results=[];for(let item of data.items){try{let blob=item.data?blob64(item.data):blob64((await remote({op:'image',url:item.url})).data);let image=await storeImage(blob,item.remove);let p=product(item.id);if(item.variant){let v=p.variants.find(v=>v.id===item.variant);if(!v)throw Error('Colour variant not found');v.image=image}else p.variants.push({id:uid(),name:item.name||'',image});await save();results.push({id:item.id,key:item.key,ok:true})}catch(e){results.push({id:item.id,key:item.key,error:e.message})}}return results}
+ if(path==='add-products'){
+ if(!Array.isArray(data.items)||data.items.length>100)throw Error('Add up to 100 products at a time');
+ let results=[];
+ for(let item of data.items){try{
+ const name=String(item.name||'').trim(),style=String(item.style||'').trim(),gender=item.gender,category=String(item.category||'').trim();
+ if(!name||name.length>160)throw Error('Enter a product name (max 160 characters)');
+ if(!['men','woman','unisex'].includes(gender))throw Error('Choose Men, Women or Unisex');
+ if(!category||category.length>80)throw Error('Choose a category');
+ if(state.products.some(p=>p.gender===gender&&(style?p.style===style:p.name.trim().toLowerCase()===name.toLowerCase())))throw Error('This product already exists for this gender');
+ if(item.url&&!/^https:\/\//i.test(item.url))throw Error('Use a direct HTTPS image URL');
+ if(item.source&&!/^https:\/\/(www\.)?klattermusen\.com\//i.test(item.source))throw Error('Use an official Klättermusen product page');
+ let variants=[];
+ if(item.data||item.url){let blob=item.data?blob64(item.data):blob64((await remote({op:'image',url:item.url})).data);let image=await storeImage(blob,item.remove);variants=[{id:uid(),name:String(item.colour||'').trim(),image}]}
+ let p={id:uid(),name,style,gender,category,source:String(item.source||'').trim(),features:(item.features||[]).filter(x=>typeof x==='string'&&x.trim()).slice(0,3),variants};
+ state.products.push(p);try{await save()}catch(e){state.products=state.products.filter(x=>x.id!==p.id);throw e}
+ results.push({key:item.key,id:p.id,ok:true});
+ }catch(e){results.push({key:item.key,ok:false,error:e.message})}}
+ scheduleFeatures();return results;
+ }
+ if(path==='delete-products'){
+ const ids=new Set(data.ids||[]);state.trash??=[];const deleted=state.products.filter(p=>ids.has(p.id));
+ for(let p of deleted){state.trash.push({product:clone(p),queue:clone(state.queue?.[p.id]||null),deletedAt:new Date().toISOString()});if(state.queue)delete state.queue[p.id]}
+ state.products=state.products.filter(p=>!ids.has(p.id));await save();return {deleted:deleted.length};
+ }
+ if(path==='restore-products'){
+ const ids=new Set(data.ids||[]);const records=(state.trash||[]).filter(x=>ids.has(x.product.id));
+ for(let x of records){if(!state.products.some(p=>p.id===x.product.id)){for(let v of x.product.variants){if(!urls.has(v.image)){let b=await read('images',v.image);if(b)urls.set(v.image,URL.createObjectURL(b))}}state.products.push(x.product);if(x.queue){state.queue??={};state.queue[x.product.id]=x.queue}}}
+ state.trash=(state.trash||[]).filter(x=>!ids.has(x.product.id));await save();return {restored:records.length};
+ }
  if(path==='features')return fetchFeatures(data.ids,true);
  if(path==='candidates'){let p=product(data.id),r=await remote({op:'product',url:p.source||'',name:p.name,style:p.style||'',gender:p.gender});return {options:r.images.map(url=>({url,preview:url,label:'Product image'})),error:''}}
  if(path==='new'){let p={id:uid(),name:data.name,style:data.style||'',gender:data.gender||'unisex',category:data.category||'Other',source:'',features:[],variants:[]};state.products.push(p);await save();return clone(p)}
