@@ -1,10 +1,10 @@
 {
-  "version": "d50439edb6230c76",
+  "version": "24f9e77d6ef51095",
   "name": "Klättermusen catalogue",
-  "updated": "2026-10-03",
-  "products": 213,
+  "updated": "2026-10-12",
+  "products": 256,
   "features": 129,
-  "bytes": 14972613,
+  "bytes": 19512606,
   "packs": [
     {
       "file": "products-d50439edb6230c76-01.zip",
@@ -305,6 +305,81 @@
         "4aa89270-3ec8-4368-ae80-6e018326649d",
         "985345c6-813d-4552-a841-622cb69257d9",
         "1f706d3a-ff13-4524-8e0f-498b9afabf05"
+      ]
+    },
+    {
+      "file": "products-24f9e77d6ef51095-12.zip",
+      "bytes": 1107805,
+      "sha256": "bc3fd823d4b38afa5ef833b69a8b269ebd95f334df6eda9abc69459ff79f7b11",
+      "products": 11,
+      "ids": [
+        "32b77aa3-93e5-5e5a-a43d-525432f2f20c",
+        "d296f3f9-c3c2-5f16-8c8e-b78ad2c45389",
+        "9b7cf857-5a92-580c-91f4-660fd94e921f",
+        "4c539648-c96f-5df3-a53f-2a79596b68f9",
+        "4d7ee959-d287-53db-b4c7-0a0e710fef45",
+        "fdfe2fb4-6ae6-516e-b606-288bee3adc84",
+        "02176e8d-3ca2-5e94-97e6-07f2ae3f8651",
+        "5924cbcb-cee0-550c-83e8-cbcde78a3ce7",
+        "92110b46-0271-50df-b678-2411d80cb6a3",
+        "1f5c35ed-fa9b-5dff-afdc-fa1c34562388",
+        "5c62d5b5-c0e8-50af-b9fc-fb7afea542ff"
+      ]
+    },
+    {
+      "file": "products-24f9e77d6ef51095-13.zip",
+      "bytes": 1277580,
+      "sha256": "e0145c280dc8333ea5bae37476f04731f712cdac9c93a0948feb1933c1c2b746",
+      "products": 8,
+      "ids": [
+        "415f646b-bb76-535c-b644-801662becc74",
+        "36923466-f6c8-58f7-bcca-7c0c7094f93b",
+        "d33a61a1-c2eb-52bf-b85d-fe6f43b31ef2",
+        "c548b7f9-8664-5407-bbef-c1446a219a29",
+        "9e70b601-5a66-52bf-993f-78ea42d07fa4",
+        "fdaf3cd8-6f1f-5e17-ab94-b316bac29d00",
+        "851b8568-b132-5fa8-afa7-2f918427aa77",
+        "2b103b43-cf49-58de-a646-97dae3f5f42a"
+      ]
+    },
+    {
+      "file": "products-24f9e77d6ef51095-14.zip",
+      "bytes": 1251197,
+      "sha256": "dc3c69c45c96766d89fe1f5811d9c1bbd3926be9e645ec1899cedc22e267f5bf",
+      "products": 10,
+      "ids": [
+        "bbb795c0-2527-5bc8-af52-1cda1a775067",
+        "ecc2d19e-4957-555d-9b87-57458ca6d1d0",
+        "1eaf80e0-20d4-5bda-86a6-f924e6da1a9a",
+        "c184a97c-5da4-53ca-8860-0583a830f119",
+        "e264eeb2-91c6-5d66-a9c5-5d4abe46f01d",
+        "872c6476-243b-567a-aab5-176027e2fe71",
+        "d7d592df-3cfd-5f66-bc66-7ba6d29660d1",
+        "97407c19-8059-5d92-b732-166762af8db8",
+        "c9ac2bcc-5765-5a30-bde4-d5bd98c4d432",
+        "78176616-d5f8-5fa3-8e51-b89a7606050c"
+      ]
+    },
+    {
+      "file": "products-24f9e77d6ef51095-15.zip",
+      "bytes": 903411,
+      "sha256": "1db114bac7df50653cb027cc4eb6ba48f1f113518afa0b8a9958bfd3c7327abe",
+      "products": 14,
+      "ids": [
+        "068200b4-3cf0-563a-89ea-1ad84d74a428",
+        "20c259bd-5c6e-58e8-89ba-4ae2d058d1ca",
+        "d5c2d5af-58b4-574b-ab2b-3599b3b6198e",
+        "0595fafd-5029-5e95-ab14-f260e15a42f9",
+        "8f39dbbd-2e54-5c94-b82a-cb827c6dba14",
+        "041e1a0a-9841-5399-8c42-12ace483fdcb",
+        "3aa52968-c2b0-5146-8c06-9621e1b6474e",
+        "40863e3c-7443-524f-8743-15b1855716a1",
+        "66968201-46cc-5c70-ade6-72d3622e5daa",
+        "ad3fcd84-53b2-5f36-a5e8-48251318ecbb",
+        "2fae3b61-616a-55ff-8eaa-c251b7de2b60",
+        "2fba37e9-ef9e-5f78-ab6e-49ea47bff92b",
+        "d0a08d9e-1fff-5b24-bf6c-11c48a5ebbba",
+        "48f7f670-67e0-5bd3-8a81-9002275fca03"
       ]
     }
   ]
